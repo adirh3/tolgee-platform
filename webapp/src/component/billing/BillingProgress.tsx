@@ -5,7 +5,6 @@ import { BILLING_CRITICAL_PERCENT } from './constants';
 
 const StyledContainer = styled(Box)`
   display: grid;
-  height: 6px;
   border-radius: 4px;
   background: ${({ theme }) => theme.palette.success.light}55;
   overflow: hidden;
@@ -26,13 +25,22 @@ const StyledProgress = styled(Box)`
 
 type Props = BoxProps & {
   percent: number;
+  height?: number;
 };
 
-export const BillingProgress: React.FC<Props> = ({ percent, ...boxProps }) => {
+export const BillingProgress: React.FC<Props> = ({
+  percent,
+  height = 6,
+  ...boxProps
+}) => {
   const normalized = percent > 100 ? 100 : percent < 0 ? 0 : percent;
   const critical = normalized < BILLING_CRITICAL_PERCENT;
   return (
-    <StyledContainer className={clsx({ critical })} {...boxProps}>
+    <StyledContainer
+      className={clsx({ critical })}
+      height={height}
+      {...boxProps}
+    >
       <StyledProgress width={`${normalized}%`} className={clsx({ critical })} />
     </StyledContainer>
   );

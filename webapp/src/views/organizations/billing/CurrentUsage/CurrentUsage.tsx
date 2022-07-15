@@ -43,13 +43,13 @@ export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
         />
         <PlanMetric
           name={t('billing_actual_monthly_credits')}
-          currentAmount={usage.creditBalance / 100}
-          totalAmount={(usage.includedMtCredits || 0) / 100}
+          currentAmount={Math.round(usage.creditBalance / 100)}
+          totalAmount={Math.round((usage.includedMtCredits || 0) / 100)}
           periodEnd={activePlan.currentPeriodEnd}
         />
         <PlanMetric
           name={t('billing_actual_extra_credits')}
-          currentAmount={usage.extraCreditBalance || 0}
+          currentAmount={Math.round((usage.extraCreditBalance || 0) / 100)}
         />
         {!activePlan.free && (
           <>

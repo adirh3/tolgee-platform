@@ -146,7 +146,6 @@ export const OrganizationBillingView: FunctionComponent = () => {
                 onPeriodChange={(period) => setPeriod(period)}
                 period={period}
               />
-
               <Credits />
             </StyledShopping>
           </>

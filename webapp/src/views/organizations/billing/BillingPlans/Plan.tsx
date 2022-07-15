@@ -16,22 +16,35 @@ type PlanModel = components['schemas']['PlanModel'];
 type Period = components['schemas']['SubscribeRequest']['period'];
 
 const StyledPlan = styled('div')`
-  background: ${({ theme }) => theme.palette.emphasis[200]};
+  position: relative;
+  background: ${({ theme }) => theme.palette.emphasis[50]};
   border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
   border-radius: 20px;
+  overflow: hidden;
+`;
+
+const StyledContent = styled('div')`
   padding: 20px;
+  padding-top: 25px;
   display: grid;
   gap: 8px;
-  grid-template-rows: 1fr auto auto auto;
+  grid-template-rows: 1fr auto auto;
   grid-template-areas:
     'title '
     'info  '
-    'switch'
     'action';
-  border: 1px solid transparent;
-  &.active {
-    border: 1px solid ${({ theme }) => theme.palette.primary.main};
-  }
+`;
+
+const StyledSubtitle = styled('div')`
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  font-size: 14px;
+  padding: 0px 20px 0px 20px;
+  color: ${({ theme }) => theme.palette.primary.main};
+  background: ${({ theme }) =>
+    theme.palette.mode === 'light' ? '#f3cfe0' : '#47333d'};
 `;
 
 type Props = {
@@ -63,72 +76,76 @@ export const Plan: FC<Props> = ({
 
   return (
     <StyledPlan className={clsx({ active: isActive })}>
-      <PlanTitle
-        title={plan.name}
-        subtitle={
-          isActive
-            ? isEnded
-              ? t('billing_subscription_cancelled')
-              : t('billing_subscription_active')
-            : undefined
-        }
-      />
+      {isActive && (
+        <StyledSubtitle>
+          {isEnded
+            ? t('billing_subscription_cancelled')
+            : t('billing_subscription_active')}
+        </StyledSubtitle>
+      )}
+      <StyledContent>
+        <PlanTitle title={plan.name} />
 
-      <PlanInfo plan={plan} />
-      <Box gridArea="switch" minHeight={19}>
-        {!plan.free && (
-          <PeriodSwitch value={period} onChange={onPeriodChange} />
-        )}
-      </Box>
+        <PlanInfo plan={plan} />
 
-      <Box gridArea="action" display="flex" justifyItems="space-between">
-        <PlanPrice
-          price={
-            period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice / 12
-          }
-          period={period}
-        />
-
-        {prepareUpgradeMutation.data && (
-          <PrepareUpgradeDialog
-            data={prepareUpgradeMutation.data}
-            onClose={() => {
-              prepareUpgradeMutation.reset();
-            }}
+        <Box
+          gridArea="action"
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <PlanPrice
+            price={
+              period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice / 12
+            }
+            period={period}
           />
-        )}
-      </Box>
 
-      {!plan.free &&
-        (isActive && !isEnded ? (
-          <PlanActionButton
-            loading={cancelMutation.isLoading}
-            onClick={() => onCancel()}
-          >
-            {t('billing_plan_cancel')}
-          </PlanActionButton>
-        ) : isActive && isEnded ? (
-          <PlanActionButton
-            loading={prepareUpgradeMutation.isLoading}
-            onClick={() => onPrepareUpgrade()}
-          >
-            {t('billing_plan_resubscribe')}
-          </PlanActionButton>
-        ) : isOrganizationSubscribed ? (
-          <PlanActionButton
-            loading={prepareUpgradeMutation.isLoading}
-            onClick={() => onPrepareUpgrade()}
-          >
-            {t('billing_plan_subscribe')}
-          </PlanActionButton>
-        ) : (
-          <PlanActionButton
-            loading={subscribeMutation.isLoading}
-            onClick={() => onSubscribe()}
-          >
-            {t('billing_plan_subscribe')}
-          </PlanActionButton>
-        ))}
+          {!plan.free && (
+            <PeriodSwitch value={period} onChange={onPeriodChange} />
+          )}
+
+          {!plan.free &&
+            (isActive && !isEnded ? (
+              <PlanActionButton
+                loading={cancelMutation.isLoading}
+                onClick={() => onCancel()}
+              >
+                {t('billing_plan_cancel')}
+              </PlanActionButton>
+            ) : isActive && isEnded ? (
+              <PlanActionButton
+                loading={prepareUpgradeMutation.isLoading}
+                onClick={() => onPrepareUpgrade()}
+              >
+                {t('billing_plan_resubscribe')}
+              </PlanActionButton>
+            ) : isOrganizationSubscribed ? (
+              <PlanActionButton
+                loading={prepareUpgradeMutation.isLoading}
+                onClick={() => onPrepareUpgrade()}
+              >
+                {t('billing_plan_subscribe')}
+              </PlanActionButton>
+            ) : (
+              <PlanActionButton
+                loading={subscribeMutation.isLoading}
+                onClick={() => onSubscribe()}
+              >
+                {t('billing_plan_subscribe')}
+              </PlanActionButton>
+            ))}
+
+          {prepareUpgradeMutation.data && (
+            <PrepareUpgradeDialog
+              data={prepareUpgradeMutation.data}
+              onClose={() => {
+                prepareUpgradeMutation.reset();
+              }}
+            />
+          )}
+        </Box>
+      </StyledContent>
     </StyledPlan>
   );
 };

@@ -1,10 +1,12 @@
 import { Box, styled } from '@mui/material';
+import clsx from 'clsx';
 import { BillingProgress } from 'tg.component/billing/BillingProgress';
+import { BILLING_CRITICAL_PERCENT } from 'tg.component/billing/constants';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 
 export const StyledMetrics = styled('div')`
   display: grid;
-  grid-template-columns: auto auto 2fr auto;
+  grid-template-columns: auto auto 2fr;
   gap: 4px 8px;
   margin: 16px 0px;
 `;
@@ -16,7 +18,17 @@ const StyledName = styled(Box)`
 `;
 
 const StyledProgress = styled(Box)`
-  padding-top: 9px;
+  display: grid;
+  align-items: center;
+`;
+
+const StyledValue = styled('span')`
+  &.red {
+    color: ${({ theme }) => theme.palette.error.main};
+  }
+  &.green {
+    color: ${({ theme }) => theme.palette.success.main};
+  }
 `;
 
 type Props = {
@@ -32,20 +44,23 @@ export const PlanMetric: React.FC<Props> = ({
   totalAmount,
 }) => {
   const formatNumber = useNumberFormatter();
-
   const showProgress = totalAmount !== undefined;
+  const progress = (currentAmount / totalAmount!) * 100;
+  const valueClass = progress < BILLING_CRITICAL_PERCENT ? 'red' : 'green';
 
   return (
     <>
       <StyledName>{name}</StyledName>
-      <Box>{formatNumber(currentAmount)}</Box>
+      <Box>
+        <StyledValue className={clsx({ [valueClass]: showProgress })}>
+          {formatNumber(currentAmount)}
+        </StyledValue>
+        <span>{showProgress ? ` / ${formatNumber(totalAmount!)}` : ''}</span>
+      </Box>
       {showProgress && (
-        <>
-          <StyledProgress>
-            <BillingProgress percent={(currentAmount / totalAmount!) * 100} />
-          </StyledProgress>
-          <Box>{formatNumber(totalAmount!)}</Box>
-        </>
+        <StyledProgress>
+          <BillingProgress percent={progress} height={8} />
+        </StyledProgress>
       )}
     </>
   );
